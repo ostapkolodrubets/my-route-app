@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Route Planner AI - OSM</title>
+<title>Route Planner AI - OSM Geocoding</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <style>
@@ -58,12 +58,24 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <script>
-var map = L.map('map').setView([50.45, 30.523], 6); // Центр України
+var map = L.map('map').setView([50.45, 30.523], 6); // центр України
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 var control = null;
+
+// Функція геокодування через Nominatim
+async function geocode(address) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data && data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    } else {
+        throw new Error("Address not found: " + address);
+    }
+}
 
 async function send() {
     const start = document.getElementById("start").value.trim();
@@ -76,55 +88,48 @@ async function send() {
 
     document.getElementById("result").innerText = "Loading route and AI recommendations...";
 
-    const payload = { start_address: start, end_address: end };
-
     try {
+        // Геокодуємо обидві адреси
+        const startCoords = await geocode(start);
+        const endCoords = await geocode(end);
+
+        // Малюємо маршрут на карті
+        if(control) map.removeControl(control);
+        control = L.Routing.control({
+            waypoints: [
+                L.latLng(startCoords[0], startCoords[1]),
+                L.latLng(endCoords[0], endCoords[1])
+            ],
+            routeWhileDragging: false,
+            show: true
+        }).addTo(map);
+
+        control.on('routesfound', e => map.fitBounds(e.routes[0].bounds));
+
+        // Надсилаємо AI текстові адреси для порад
+        const payload = { start_address: start, end_address: end };
         const res = await fetch("https://hook.eu2.make.com/y9ianrfc2521t2g4vl44z6vwpscwhq5l", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
-        const text = await res.text(); // отримуємо як текст
+        const text = await res.text();
         let data;
-
         try {
-            // Видаляємо Markdown або трьохбектіксові символи
-            const cleaned = text.replace(/```/g, '');
-            data = JSON.parse(cleaned); // намагаємось парсити JSON
+            const cleaned = text.replace(/```/g, ''); // видаляємо Markdown
+            data = JSON.parse(cleaned);
         } catch(e) {
-            console.error("Response is not valid JSON:", text);
-            document.getElementById("result").innerText = "AI returned an invalid response:\n" + text;
+            document.getElementById("result").innerText = "AI returned invalid response:\n" + text;
             return;
         }
 
-        console.log(data);
-
-        if(data.start_coords && data.end_coords) {
-            // Видаляємо старий маршрут
-            if(control) map.removeControl(control);
-
-            // Створюємо новий маршрут
-            control = L.Routing.control({
-                waypoints: [
-                    L.latLng(data.start_coords[0], data.start_coords[1]),
-                    L.latLng(data.end_coords[0], data.end_coords[1])
-                ],
-                routeWhileDragging: false,
-                show: true
-            }).addTo(map);
-
-            control.on('routesfound', e => map.fitBounds(e.routes[0].bounds));
-
-            // Виводимо поради AI
-            document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
-        } else {
-            document.getElementById("result").innerText = "AI did not return valid coordinates!";
-        }
+        // Поради AI
+        document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
 
     } catch(err) {
-        document.getElementById("result").innerText = "Error: " + err;
         console.error(err);
+        document.getElementById("result").innerText = "Error: " + err;
     }
 }
 </script>
