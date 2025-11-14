@@ -44,7 +44,7 @@ async function send() {
         console.log(data);
         document.getElementById("result").innerHTML = `
   <a href="${data.route}" target="_blank">Google Maps Route</a>
-  <pre>${data.body.advice}</pre>`;
+  <pre>${data.advice}</pre>`;
     
         } catch (err) {
         document.getElementById("result").innerText = "Error: " + err;
