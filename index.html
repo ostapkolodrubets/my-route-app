@@ -72,6 +72,11 @@ async function send() {
         end_address: end
     };
 
+     if(!start || !end) {
+        alert("Please enter both addresses!");
+        return;
+    }
+
     document.getElementById("result").innerText = "Loading...";
 
     try {
