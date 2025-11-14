@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Route AI</title>
+<title>Route AI - OSM</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <style>
 body { font-family: Arial; max-width: 600px; margin: 40px auto; }
 input, button { width: 100%; padding: 12px; margin: 8px 0; }
@@ -10,11 +12,10 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
 #map-container {
   margin-top: 20px;
 }
-#map-frame {
-  width: 100%;
-  height: 450px;
-  border: 0;
-  border-radius: 10px;
+#map { 
+  width: 100%; 
+  height: 450px; 
+  border-radius: 10px; 
 }
 
 #result {
@@ -27,18 +28,6 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
   font-family: 'Arial', sans-serif;
   line-height: 1.6;
   color: #333;
-}
-
-#result a {
-  display: inline-block;
-  margin-bottom: 15px;
-  font-weight: bold;
-  color: #2196F3;
-  text-decoration: none;
-}
-
-#result a:hover {
-  text-decoration: underline;
 }
 
 #result pre {
@@ -66,27 +55,35 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
 <button onclick="send()">Send to AI</button>
 
 <div id="map-container">
-  <iframe id="map-frame" allowfullscreen loading="lazy"></iframe>
+  <div id="map"></div>
 </div>
 
 <div id="result"></div>
 
+<script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
 <script>
+// Ініціалізація карти
+var map = L.map('map').setView([50.45, 30.523], 6); // Центр України
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+var control = null;
+
 async function send() {
     const start = document.getElementById("start").value;
     const end = document.getElementById("end").value;
-
-    const payload = {
-        start_address: start,
-        end_address: end
-    };
 
     if(!start || !end) {
         alert("Please enter both addresses!");
         return;
     }
 
-    document.getElementById("result").innerText = "Loading...";
+    document.getElementById("result").innerText = "Loading route and AI recommendations...";
+
+    const payload = { start_address: start, end_address: end };
 
     try {
         const res = await fetch("https://hook.eu2.make.com/y9ianrfc2521t2g4vl44z6vwpscwhq5l", {
@@ -98,19 +95,46 @@ async function send() {
         const data = await res.json();
         console.log(data);
 
-        if(!!data) { 
-            // Вставляємо iframe з маршрутом
-            document.getElementById("map-frame").src = data.route;
+        // Очікуємо координати від AI
+        // Формат:
+        // {
+        //   "start_coords": [lat, lon],
+        //   "end_coords": [lat, lon],
+        //   "advice": "Tolls, fuel, POI..."
+        // }
 
-            // Вставляємо поради
-            document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
+        if(!data.start_coords || !data.end_coords) {
+            document.getElementById("result").innerText = "AI did not return coordinates!";
+            return;
         }
-    
+
+        // Видаляємо старий маршрут
+        if(control) map.removeControl(control);
+
+        // Створюємо маршрут через Leaflet Routing Machine
+        control = L.Routing.control({
+            waypoints: [
+                L.latLng(data.start_coords[0], data.start_coords[1]),
+                L.latLng(data.end_coords[0], data.end_coords[1])
+            ],
+            routeWhileDragging: false,
+            show: true
+        }).addTo(map);
+
+        control.on('routesfound', function(e) {
+            map.fitBounds(e.routes[0].bounds);
+        });
+
+        // Відображаємо поради AI
+        document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
+
     } catch (err) {
         document.getElementById("result").innerText = "Error: " + err;
+        console.error(err);
     }
 }
 </script>
 
 </body>
 </html>
+
