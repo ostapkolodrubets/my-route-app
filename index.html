@@ -41,9 +41,11 @@ async function send() {
              });
 
         const data = await res.json();
-        document.getElementById("result").innerText = data.reply || JSON.stringify(data, null, 2);
-
-    } catch (err) {
+        document.getElementById("result").innerHTML = `
+  <a href="${data.body.route}" target="_blank">Google Maps Route</a>
+  <pre>${data.body.advice}</pre>`;
+    
+        } catch (err) {
         document.getElementById("result").innerText = "Error: " + err;
     }
 }
