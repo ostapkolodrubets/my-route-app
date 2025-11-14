@@ -38,6 +38,11 @@ async function send() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
+             });
+
+        const data = await res.json();
+        document.getElementById("result").innerText = data.reply || JSON.stringify(data, null, 2);
+
     } catch (err) {
         document.getElementById("result").innerText = "Error: " + err;
     }
