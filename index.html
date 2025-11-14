@@ -42,9 +42,10 @@ async function send() {
 
         const data = await res.json();
         console.log(data);
-        document.getElementById("result").innerHTML = `
+        if(!!data) { document.getElementById("result").innerHTML = `
   <a href="${data.route}" target="_blank">Google Maps Route</a>
   <pre>${data.advice}</pre>`;
+                   }
     
         } catch (err) {
         document.getElementById("result").innerText = "Error: " + err;
