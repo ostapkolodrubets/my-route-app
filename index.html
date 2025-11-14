@@ -2,21 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Route AI - OSM</title>
+<title>Route Planner AI - OSM</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <style>
 body { font-family: Arial; max-width: 600px; margin: 40px auto; }
 input, button { width: 100%; padding: 12px; margin: 8px 0; }
 
-#map-container {
-  margin-top: 20px;
-}
-#map { 
-  width: 100%; 
-  height: 450px; 
-  border-radius: 10px; 
-}
+#map-container { margin-top: 20px; }
+#map { width: 100%; height: 450px; border-radius: 10px; }
 
 #result {
   background-color: #fdfdfd;
@@ -64,7 +58,6 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <script>
-// Ініціалізація карти
 var map = L.map('map').setView([50.45, 30.523], 6); // Центр України
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
@@ -92,43 +85,43 @@ async function send() {
             body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
-        console.log(data);
+        const text = await res.text(); // отримуємо текст
+        let data;
 
-        // Очікуємо координати від AI
-        // Формат:
-        // {
-        //   "start_coords": [lat, lon],
-        //   "end_coords": [lat, lon],
-        //   "advice": "Tolls, fuel, POI..."
-        // }
-
-        if(!data.start_coords || !data.end_coords) {
-            document.getElementById("result").innerText = "AI did not return coordinates!";
+        try {
+            data = JSON.parse(text); // пробуємо парсити JSON
+        } catch(e) {
+            console.error("Response is not valid JSON:", text);
+            document.getElementById("result").innerText = "AI returned an invalid response:\n" + text;
             return;
         }
 
-        // Видаляємо старий маршрут
-        if(control) map.removeControl(control);
+        console.log(data);
 
-        // Створюємо маршрут через Leaflet Routing Machine
-        control = L.Routing.control({
-            waypoints: [
-                L.latLng(data.start_coords[0], data.start_coords[1]),
-                L.latLng(data.end_coords[0], data.end_coords[1])
-            ],
-            routeWhileDragging: false,
-            show: true
-        }).addTo(map);
+        if(data.start_coords && data.end_coords) {
+            // Видаляємо старий маршрут
+            if(control) map.removeControl(control);
 
-        control.on('routesfound', function(e) {
-            map.fitBounds(e.routes[0].bounds);
-        });
+            // Створюємо маршрут
+            control = L.Routing.control({
+                waypoints: [
+                    L.latLng(data.start_coords[0], data.start_coords[1]),
+                    L.latLng(data.end_coords[0], data.end_coords[1])
+                ],
+                routeWhileDragging: false,
+                show: true
+            }).addTo(map);
 
-        // Відображаємо поради AI
-        document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
+            control.on('routesfound', e => map.fitBounds(e.routes[0].bounds));
 
-    } catch (err) {
+            // Поради від AI
+            document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
+
+        } else {
+            document.getElementById("result").innerText = "AI did not return coordinates!";
+        }
+
+    } catch(err) {
         document.getElementById("result").innerText = "Error: " + err;
         console.error(err);
     }
@@ -137,4 +130,3 @@ async function send() {
 
 </body>
 </html>
-
