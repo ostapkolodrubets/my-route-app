@@ -66,8 +66,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var control = null;
 
 async function send() {
-    const start = document.getElementById("start").value;
-    const end = document.getElementById("end").value;
+    const start = document.getElementById("start").value.trim();
+    const end = document.getElementById("end").value.trim();
 
     if(!start || !end) {
         alert("Please enter both addresses!");
@@ -85,11 +85,13 @@ async function send() {
             body: JSON.stringify(payload)
         });
 
-        const text = await res.text(); // отримуємо текст
+        const text = await res.text(); // отримуємо як текст
         let data;
 
         try {
-            data = JSON.parse(text); // пробуємо парсити JSON
+            // Видаляємо Markdown або трьохбектіксові символи
+            const cleaned = text.replace(/```/g, '');
+            data = JSON.parse(cleaned); // намагаємось парсити JSON
         } catch(e) {
             console.error("Response is not valid JSON:", text);
             document.getElementById("result").innerText = "AI returned an invalid response:\n" + text;
@@ -102,7 +104,7 @@ async function send() {
             // Видаляємо старий маршрут
             if(control) map.removeControl(control);
 
-            // Створюємо маршрут
+            // Створюємо новий маршрут
             control = L.Routing.control({
                 waypoints: [
                     L.latLng(data.start_coords[0], data.start_coords[1]),
@@ -114,11 +116,10 @@ async function send() {
 
             control.on('routesfound', e => map.fitBounds(e.routes[0].bounds));
 
-            // Поради від AI
+            // Виводимо поради AI
             document.getElementById("result").innerHTML = `<pre>${data.advice}</pre>`;
-
         } else {
-            document.getElementById("result").innerText = "AI did not return coordinates!";
+            document.getElementById("result").innerText = "AI did not return valid coordinates!";
         }
 
     } catch(err) {
