@@ -94,8 +94,9 @@ async function send() {
         if(!!data) { 
             document.getElementById("result").innerHTML = `
   <a href="${data.route}" target="_blank">Google Maps Route</a>
-  <pre>${data.advice}</pre>`;
-             document.getElementById("map-frame").src = data.map_iframe_src;
+  <pre>${data.advice}</pre>
+  document.getElementById("map-frame").src = data.map_iframe_src;`;
+             
         }
     
         } catch (err) {
