@@ -9,12 +9,9 @@ async function send() {
         return;
     }
 
-    document.getElementById("result").innerText = "Loading...";
+    document.getElementById("result").innerHTML = "Loading...";
 
-    const payload = {
-        start_address: start,
-        end_address: end
-    };
+    const payload = { start_address: start, end_address: end };
 
     try {
         const res = await fetch("https://hook.eu2.make.com/y9ianrfc2521t2g4vl44z6vwpscwhq5l", {
@@ -28,12 +25,18 @@ async function send() {
 
         if(data) {
             document.getElementById("result").innerHTML = `
-                <a href="${data.route}" target="_blank">Google Maps Route</a>
-                <pre>${data.advice}</pre>
+                <div class="result-card">
+                    <h3>Route Link</h3>
+                    <a href="${data.route}" target="_blank">Open in Google Maps</a>
+                </div>
+                <div class="result-card">
+                    <h3>Recommendations</h3>
+                    <pre>${data.advice}</pre>
+                </div>
             `;
         }
 
     } catch (err) {
-        document.getElementById("result").innerText = "Error: " + err;
+        document.getElementById("result").innerHTML = `<div class="result-card"><h3>Error</h3><pre>${err}</pre></div>`;
     }
 }
