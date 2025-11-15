@@ -3,47 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Route AI</title>
-<style>
-body { font-family: Arial; max-width: 600px; margin: 40px auto; }
-input, button { width: 100%; padding: 12px; margin: 8px 0; }
-
-#result {
-  background-color: #fdfdfd;       /* світлий фон */
-  border-left: 5px solid #4CAF50;  /* зелена смужка зліва */
-  padding: 20px;
-  margin-top: 20px;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  font-family: 'Arial', sans-serif;
-  line-height: 1.6;
-  color: #333;
-}
-
-#result a {
-  display: inline-block;
-  margin-bottom: 15px;
-  font-weight: bold;
-  color: #2196F3;
-  text-decoration: none;
-}
-
-#result a:hover {
-  text-decoration: underline;
-}
-
-#result pre {
-  white-space: pre-wrap;      /* перенос рядків */
-  word-wrap: break-word;
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin-top: 10px;
-  color: #444;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-}
-</style>
+<link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -53,49 +13,10 @@ input, button { width: 100%; padding: 12px; margin: 8px 0; }
 <input id="start" placeholder="Enter start address" />
 <input id="end" placeholder="Enter destination address" />
 
-<button onclick="send()">Send to AI</button>
+<button id="sendBtn">Send to AI</button>
 
 <div id="result"></div>
 
-<script>
-async function send() {
-    const start = document.getElementById("start").value.trim();
-    const end = document.getElementById("end").value.trim();
-
-    if(!start || !end) {
-        alert("Please enter both addresses!");
-        return;
-    }
-
-    document.getElementById("result").innerText = "Loading...";
-
-    const payload = {
-        start_address: start,
-        end_address: end
-    };
-
-    try {
-        const res = await fetch("https://hook.eu2.make.com/y9ianrfc2521t2g4vl44z6vwpscwhq5l", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        console.log(data);
-
-        if(data) {
-            document.getElementById("result").innerHTML = `
-                <a href="${data.route}" target="_blank">Google Maps Route</a>
-                <pre>${data.advice}</pre>
-            `;
-        }
-
-    } catch (err) {
-        document.getElementById("result").innerText = "Error: " + err;
-    }
-}
-</script>
-
+<script src="main.js"></script>
 </body>
 </html>
