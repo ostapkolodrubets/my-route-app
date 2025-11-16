@@ -4,9 +4,15 @@ async function send() {
     const start = document.getElementById("start").value.trim();
     const end = document.getElementById("end").value.trim();
     const vehicle = document.getElementById("vehicle").value;
+    const travelDate = document.getElementById("travel_date").value;
 
     if (!start || !end) {
         alert("Please enter both addresses!");
+        return;
+    }
+
+    if (!travelDate) {
+        alert("Please select a travel date!");
         return;
     }
 
@@ -15,7 +21,8 @@ async function send() {
     const payload = { 
         start_address: start,
         end_address: end,
-        vehicle_type: vehicle
+        vehicle_type: vehicle,
+        travel_date: travelDate
     };
 
     try {
