@@ -23,6 +23,15 @@ function addStop() {
     `;
 
     container.insertBefore(div, document.getElementById("end"));
+
+    // Переміщуємо End після останньої зупинки
+const endLabel = document.querySelector("label[for='end']");
+const endInput = document.getElementById("end");
+if (endLabel && endInput) {
+    container.appendChild(endLabel);
+    container.appendChild(endInput);
+}
+
 }
 
 // Зібрати всі зупинки
