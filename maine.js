@@ -45,7 +45,7 @@ sendBtn.addEventListener("click", async () => {
         });
 
         const data = await res.json();
-
+        
         if (data) {
             document.getElementById("result").innerHTML = `
                 <div class="result-card">
@@ -55,8 +55,7 @@ sendBtn.addEventListener("click", async () => {
                 <div class="result-card">
                     <h3>Recommendations</h3>
                     <pre>${data.advice}</pre>
-                </div>
-            `;
+                </div>`;
         }
     } catch (err) {
         document.getElementById("result").innerHTML = `<div class="result-card"><h3>Error</h3><pre>${err}</pre></div>`;
