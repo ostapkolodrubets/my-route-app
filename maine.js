@@ -38,7 +38,7 @@ sendBtn.addEventListener("click", async () => {
     };
 
     try {
-        const res = await fetch("https://your-backend-url/route", {
+        const res = await fetch("https://hook.eu2.make.com/y9ianrfc2521t2g4vl44z6vwpscwhq5l", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
