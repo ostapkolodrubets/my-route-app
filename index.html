@@ -10,12 +10,17 @@
 
 <h2>Route Planner AI</h2>
 
-<div id="stops-container">
-    <input class="stop-input" id="start" placeholder="Enter start address" />
-    <input class="stop-input" id="end" placeholder="Enter destination address" />
+<div id="stopsContainer">
+    <label>Start:</label>
+    <input id="start" placeholder="Enter start address" />
+
+    <label>End:</label>
+    <input id="end" placeholder="Enter destination address" />
 </div>
 
-<button id="addStopBtn">Add Another Stop</button>
+<button id="addStopBtn">+ Add another stop</button>
+
+<br><br>
 
 <label for="vehicle">Тип транспорту:</label>
 <select id="vehicle">
@@ -25,8 +30,12 @@
   <option value="motorcycle">Мотоцикл</option>
 </select>
 
-<label for="date">Дата подорожі:</label>
+<br><br>
+
+<label for="travel_date">Travel date:</label>
 <input type="date" id="travel_date">
+
+<br><br>
 
 <button id="sendBtn">Send to AI</button>
 
