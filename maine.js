@@ -22,17 +22,19 @@ function addStop() {
         <input type="text" class="stop-input" placeholder="Enter stop address">
     `;
 
-    container.insertBefore(div, document.getElementById("end"));
+    // Додаємо новий stop перед End input
+    const endInput = document.getElementById("end");
+    div.appendChild(document.createElement("br")); // для зручності розмітки
+    container.insertBefore(div, endInput);
 
-    // Переміщуємо End після останньої зупинки
-const endLabel = document.querySelector("label[for='end']");
-const endInput = document.getElementById("end");
-if (endLabel && endInput) {
-    container.appendChild(endLabel);
-    container.appendChild(endInput);
+    // Переміщуємо label для End після останньої зупинки
+    const endLabel = document.querySelector("label[for='end']");
+    if (endLabel) {
+        container.appendChild(endLabel);
+        container.appendChild(endInput);
+    }
 }
 
-}
 
 // Зібрати всі зупинки
 function getStops() {
