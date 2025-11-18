@@ -18,7 +18,6 @@ function addStop() {
 
     div.classList.add("stop-item");
     div.innerHTML = `
-        <label>Stop ${stopCount}:</label>
         <input type="text" class="stop-input" placeholder="Enter stop address">
     `;
 
