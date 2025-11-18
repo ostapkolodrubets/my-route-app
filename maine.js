@@ -71,7 +71,9 @@ async function send() {
             body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        let responseText = await res.text();
+        responseText = responseText.replace(/^```json\s*/, '').replace(/```$/, '');
+        const data = JSON.parse(responseText);
 
         document.getElementById("result").innerHTML = `
             <div class="result-card">
@@ -79,8 +81,7 @@ async function send() {
                 <a href="${data.route}" target="_blank">Open in Google Maps</a>
             </div>
             <div class="result-card">
-                <h3>Recommendations</h3>
-                <pre>${data.advice}</pre>
+                ${data.advice}
             </div>
         `;
 
@@ -91,6 +92,7 @@ async function send() {
 }
 
 function enableDragAndDrop() {
+    console.log('zalupa')
     const rows = document.querySelectorAll(".stop-row");
     let dragged = null;
 
