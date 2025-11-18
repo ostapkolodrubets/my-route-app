@@ -5,8 +5,7 @@ body {
     background: #f9f9f9;
 }
 
-input, button { 
-    width: 100%; 
+input, select, button { 
     padding: 12px; 
     margin: 8px 0; 
     border-radius: 6px;
@@ -66,8 +65,53 @@ button:hover {
     border-radius: 8px;
     overflow-x: auto;
     color: #444;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
     white-space: pre-wrap;
     word-wrap: break-word;
+}
+
+.row-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.row-line label {
+    white-space: nowrap;
+}
+
+.stop-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.stop-row input {
+    flex: 1;
+}
+
+.add-btn, .remove-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    padding: 0;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.add-btn {
+    background-color: #4CAF50;
+}
+
+.remove-btn {
+    background-color: #f44336;
+}
+
+#sendBtn {
+    width: 100%;
+}
+
+#end {
+    width: 100%;
 }

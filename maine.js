@@ -4,7 +4,6 @@ document.getElementById("addStopBtn").addEventListener("click", addStop);
 let stopCount = 0;
 const maxStops = 5;
 
-// Додавання зупинок
 function addStop() {
     if (stopCount >= maxStops) {
         alert(`Maximum stops allowed: ${maxStops}`);
@@ -12,37 +11,37 @@ function addStop() {
     }
 
     stopCount++;
-
     const container = document.getElementById("stopsContainer");
-    const div = document.createElement("div");
+    const endInput = document.getElementById("end");
 
-    div.classList.add("stop-item");
+    const div = document.createElement("div");
+    div.classList.add("stop-row");
+    div.draggable = true;
     div.innerHTML = `
         <input type="text" class="stop-input" placeholder="Enter stop address">
+        <button class="remove-btn">x</button>
     `;
 
-    // Додаємо новий stop перед End input
-    const endInput = document.getElementById("end");
-    div.appendChild(document.createElement("br")); // для зручності розмітки
     container.insertBefore(div, endInput);
 
-    // Переміщуємо label для End після останньої зупинки
-    const endLabel = document.querySelector("label[for='end']");
-    if (endLabel) {
-        container.appendChild(endLabel);
-        container.appendChild(endInput);
-    }
+    const input = div.querySelector("input");
+    input.focus();
+
+    const removeBtn = div.querySelector(".remove-btn");
+    removeBtn.addEventListener("click", () => {
+        div.remove();
+        stopCount--;
+    });
+
+    enableDragAndDrop();
 }
 
-
-// Зібрати всі зупинки
 function getStops() {
     return [...document.querySelectorAll(".stop-input")]
         .map(i => i.value.trim())
         .filter(v => v.length > 0);
 }
 
-// Надсилання в AI / Make / Backend
 async function send() {
     const start = document.getElementById("start").value.trim();
     const end = document.getElementById("end").value.trim();
@@ -73,7 +72,6 @@ async function send() {
         });
 
         const data = await res.json();
-        console.log(data);
 
         document.getElementById("result").innerHTML = `
             <div class="result-card">
@@ -91,3 +89,34 @@ async function send() {
             `<div class="result-card"><h3>Error</h3><pre>${err}</pre></div>`;
     }
 }
+
+function enableDragAndDrop() {
+    const rows = document.querySelectorAll(".stop-row");
+    let dragged = null;
+
+    rows.forEach(row => {
+        row.addEventListener("dragstart", e => {
+            dragged = row;
+            row.style.opacity = "0.5";
+        });
+
+        row.addEventListener("dragend", e => {
+            dragged = null;
+            row.style.opacity = "1";
+        });
+
+        row.addEventListener("dragover", e => {
+            e.preventDefault();
+        });
+
+        row.addEventListener("drop", e => {
+            e.preventDefault();
+            if (dragged && dragged !== row) {
+                const container = document.getElementById("stopsContainer");
+                container.insertBefore(dragged, row);
+            }
+        });
+    });
+}
+
+enableDragAndDrop();
